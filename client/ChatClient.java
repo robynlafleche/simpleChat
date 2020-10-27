@@ -90,15 +90,7 @@ public class ChatClient extends AbstractClient
     catch(IOException e) {}
     System.exit(0);
   }
-  /**
-   * Method called after the connection is lost, displays a message indicating 
-   * the connection has been lost and then closed. This
-   * method may be overridden by subclasses.
-   */
-  protected void connectionClosed() {
-	  clientUI.display("Connection to the server has been terminated. Now closing the program.");
-	  System.exit(0);
-  }
+
   /**
    * Method called each time an exception is thrown by the client's thread 
    * indicating that the client is waiting for messages from the server. This
@@ -107,6 +99,15 @@ public class ChatClient extends AbstractClient
    * @param exception the exception raised 
    */
   protected void connectionException(Exception exception) {
+	  clientUI.display("Connection to the server has been terminated. Now closing the program.");
+	  quit();
+  }
+  
+  /**
+   * This method closes the connection after an unexpected termination error occurs.
+   */
+  protected void connectionClosed() {
+	  clientUI.display("Connection closed");
 	  connectionClosed();
   }
 }

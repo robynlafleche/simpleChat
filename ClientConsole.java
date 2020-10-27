@@ -86,7 +86,13 @@ public class ClientConsole implements ChatIF
       while (true) 
       {
         message = fromConsole.nextLine();
-        client.handleMessageFromClientUI(message);
+    	if (message.startsWith("#")) {
+    		 handleClientFunctions (message);
+    		 continue;
+    	}
+    	else {
+    		client.handleMessageFromClientUI(message);
+    	}
       }
     } 
     catch (Exception ex) 
@@ -94,6 +100,74 @@ public class ClientConsole implements ChatIF
       System.out.println
         ("Unexpected error while reading from console!");
     }
+  }
+  
+  /**
+   * This method implements the different commands specified by the user
+   */
+  private void handleClientFunctions(String msg) {
+	  
+	  if (msg.equals("#quit")) {
+		  disconnectFromServer();
+		  System.out.println("Quitting the program");
+		  client.quit();
+	  }
+	  else if (msg.equals("#logoff")) {
+		  disconnectFromServer();
+	  }
+	  else if (msg.startsWith("#sethost")) {
+		  if(client.isConnected()) {
+			  System.out.println("You must log out of current session before setting a host, please use #logout.");
+		  }
+		  if (msg.split(" ").length < 2) {
+			  System.out.println("Missing argument, there was no host specified");
+			  return;
+		  }
+		  
+		  String nHost = msg.split(" ")[1];
+		  client.setHost(nHost);
+		  System.out.println("The host was set to " + nHost);
+	  }
+	  else if (msg.startsWith("#setport")) {
+		  if(client.isConnected()) {
+			  System.out.println("You must log out of current session before setting a port, please use #logout.");
+		  }
+		  if (msg.split(" ").length < 2) {
+			  System.out.println("Missing argument, there was no host specified");
+			  return;
+		  }
+		  
+		  try {
+			  int nPort = Integer.parseInt(msg.split(" ")[1]);
+			  client.setPort(nPort);
+			  System.out.println("The port was set to " + nPort);			  
+		  }
+		  catch(NumberFormatException e) {
+			  System.out.println("The port entered was not valid, please enter an integer representing the port.");
+		  }
+	  }
+	  
+	  else if (msg.equals("#login")) {
+		  if (client.isConnected()) {
+			  System.out.println("You need to be logged off before you can attempt to login again");
+			  return;
+		  }
+		  
+		  try {
+			  client.openConnection();
+		  }catch(IOException e) {
+			  System.out.println("Couldn't connect to the server. Please try to connect again.");
+		  }
+	  }
+	  else if (msg.equals("#gethost")) {
+		  System.out.println("Current host: " + client.getHost());
+	  }
+	  else if (msg.equals("#getport")) {
+		  System.out.println("Current port: " + client.getPort());
+	  }
+	  else {
+		  System.out.println("Please enter a valid command");
+	  }
   }
 
   /**
@@ -106,7 +180,19 @@ public class ClientConsole implements ChatIF
   {
     System.out.println("> " + message);
   }
-
+  /**
+   * This method disconnects the client from the server but does not close the program.
+   */
+  private void disconnectFromServer() {
+	  try {
+		  System.out.println("Disconnecting from the server");
+		  client.closeConnection();
+		  System.out.println("Disconnected from the server successfully");
+	  } catch (IOException e) {
+		  System.out.println("Unable to connect from the server");
+	  }
+	  
+  }
   
   //Class methods ***************************************************
   
@@ -122,7 +208,7 @@ public class ClientConsole implements ChatIF
     
     try
     {
-      host = args[0];
+      host = args[0]; //get host from command line
       port = Integer.parseInt(args[1]); //get port number from command line
     }
     catch(ArrayIndexOutOfBoundsException e)
@@ -130,7 +216,7 @@ public class ClientConsole implements ChatIF
     	if(args.length == 0) host = "localhost";
     	port = DEFAULT_PORT;
     }
-    catch(NumberFormatException e)
+    catch(NumberFormatException e) //use default if the integer arg could not be parsed
     {
       port = DEFAULT_PORT;
     }
