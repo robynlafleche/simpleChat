@@ -26,24 +26,41 @@ public class ChatClient extends AbstractClient
    * the display method in the client.
    */
   ChatIF clientUI; 
-
+  
+  /**
+   * username string variable allowing to store the name specified by the user
+   */
+  String username;
+  
+  
   
   //Constructors ****************************************************
   
   /**
    * Constructs an instance of the chat client.
    *
+   * @param username The username is to be reffered to
    * @param host The server to connect to.
    * @param port The port number to connect on.
    * @param clientUI The interface type variable.
    */
   
-  public ChatClient(String host, int port, ChatIF clientUI) 
+  public ChatClient(String username, String host, int port, ChatIF clientUI) 
     throws IOException 
   {
     super(host, port); //Call the superclass constructor
+    
+    this.isServer = isServer;
+    
+    if (username == null) {
+    	System.out.println("Error: username was not specified");
+    	connectionclosed();
+    }
+    
+    this.username = username;
     this.clientUI = clientUI;
     openConnection();
+    sendToServer("#login " + username);
   }
 
   
@@ -69,7 +86,10 @@ public class ChatClient extends AbstractClient
     try
     {
       sendToServer(message);
-    }
+      if {
+      	(!isConnected() connectionException(new IOException());
+      }
+    }  
     catch(IOException e)
     {
       clientUI.display
@@ -100,7 +120,7 @@ public class ChatClient extends AbstractClient
    */
   protected void connectionException(Exception exception) {
 	  clientUI.display("Connection to the server has been terminated. Now closing the program.");
-	  quit();
+	  connectionClosed();
   }
   
   /**
@@ -108,7 +128,7 @@ public class ChatClient extends AbstractClient
    */
   protected void connectionClosed() {
 	  clientUI.display("Connection closed");
-	  connectionClosed();
+	  quit();
   }
 }
 //End of ChatClient class

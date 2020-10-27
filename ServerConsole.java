@@ -60,7 +60,7 @@ public class ServerConsole implements ChatIF{
 		    }
 		    
 		    try {
-		    	client = new ChatClient(host, port, this);
+		    	client = new ChatClient(null, host, port, this);
 		    }
 		    catch(IOException e) {
 		    	System.out.println("Error: could not start server");
@@ -199,7 +199,7 @@ public class ServerConsole implements ChatIF{
 		    {
 		      port = DEFAULT_PORT;
 		    }
-		    ServerConsole chat= new ServerConsole(host, port);
+		    ServerConsole chat = new ServerConsole(host, port);
 		    chat.accept();  //Wait for server-side messaging
 		  }
 		}

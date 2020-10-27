@@ -48,8 +48,21 @@ public class EchoServer extends AbstractServer
   public void handleMessageFromClient
     (Object msg, ConnectionToClient client)
   {
-    System.out.println("Message received: " + msg + " from " + client);
-    this.sendToAllClients(msg);
+	
+	if(msg.toString().startsWith("#login") && msg.toString().split(" ").length > 1) {
+		client.setInfo("login id", msg.toString().split(" ")[1]);
+		
+		System.out.println("Client has been logged in with username " + msg.toString().split(" ")[1]);
+		this.sendToAllClients(client.getInfo("login id") + " has joined the chat"));
+		
+		return;
+	}
+	if (getClientConnections()[0] != client) {
+		this.sendToAllClients(client.getInfo("loginid") + " " + msg);
+	}
+	else {
+		this.sendToAllClients(msg);
+	}
   }
     
   /**
@@ -112,7 +125,7 @@ public class EchoServer extends AbstractServer
    * @param client the connection connected to the client.
    */
   protected void clientConnected(ConnectionToClient client) {
-	  sendToAllClients(client.toString() + " has connected to the server.");
+	  this.sendToAllClients(client.getInfo("loginid") + " has connected to the server.");
   }
 
   /**
@@ -123,7 +136,7 @@ public class EchoServer extends AbstractServer
    * @param client the connection with the client.
    */
   synchronized protected void clientDisconnected(ConnectionToClient client) {
-	  sendToAllClients(client.toString() + " has disconnected from the server.");
+	  this.sendToAllClients(client.getInfo("loginid") + " has disconnected from the server.");
   }
 }
 //End of EchoServer class
