@@ -50,19 +50,17 @@ public class EchoServer extends AbstractServer
   {
 	
 	if(msg.toString().startsWith("#login") && msg.toString().split(" ").length > 1) {
-		client.setInfo("login id", msg.toString().split(" ")[1]);
-		
-		System.out.println("Client has been logged in with username " + msg.toString().split(" ")[1]);
-		this.sendToAllClients(client.getInfo("login id") + " has joined the chat"));
-		
-		return;
-	}
-	if (getClientConnections()[0] != client) {
-		this.sendToAllClients(client.getInfo("loginid") + " " + msg);
+		  client.setInfo("loginid", ((String) msg).split(" ")[1]);
+		  System.out.println("Message received: " + msg + " from null");
+		  System.out.println(client.getInfo("loginid") +" has logged on.");
+		  this.sendToAllClients(client.getInfo("loginid") +" has logged on.");
+	
 	}
 	else {
-		this.sendToAllClients(msg);
+		System.out.println("Message received: " + msg + " from " + client.getInfo("loginid"));
+		this.sendToAllClients(client.getInfo("loginid") +"> " + msg);
 	}
+	
   }
     
   /**
@@ -81,11 +79,12 @@ public class EchoServer extends AbstractServer
    */
   protected void serverStopped()
   {
-	this.sendToAllClients("Warning! The server has stopped listening for connections");
-    System.out.println
+	this.sendToAllClients("WARNING - The server has stopped listening for connection");
+	this.sendToAllClients ("SERVER SHUTTING DOWN! DISCONNECTING!");
+	System.out.println
       ("Server has stopped listening for connections.");
   }
-  
+
   //Class methods ***************************************************
   
   /**
@@ -97,8 +96,7 @@ public class EchoServer extends AbstractServer
    */
   public static void main(String[] args) 
   {
-    int port = 0; //Port to listen on
-
+    int port = DEFAULT_PORT; //Port to listen on
     try
     {
       port = Integer.parseInt(args[0]); //Get port from command line
@@ -113,6 +111,8 @@ public class EchoServer extends AbstractServer
     try 
     {
       sv.listen(); //Start listening for connections
+      ServerConsole sc = new ServerConsole(sv);
+      sc.accept();
     } 
     catch (Exception ex) 
     {
@@ -125,7 +125,8 @@ public class EchoServer extends AbstractServer
    * @param client the connection connected to the client.
    */
   protected void clientConnected(ConnectionToClient client) {
-	  this.sendToAllClients(client.getInfo("loginid") + " has connected to the server.");
+	  System.out.println("A new client is attempting to connect to the server");
+	  
   }
 
   /**
@@ -137,6 +138,16 @@ public class EchoServer extends AbstractServer
    */
   synchronized protected void clientDisconnected(ConnectionToClient client) {
 	  this.sendToAllClients(client.getInfo("loginid") + " has disconnected from the server.");
+	  System.out.println(client.getInfo("loginid") + " has disconnected.");
   }
+  
+  synchronized protected void clientException(ConnectionToClient client, Throwable exception) {
+	  try {
+		client.close();
+	} catch (IOException e) {
+		e.printStackTrace();
+	}
+}
+  
 }
 //End of EchoServer class

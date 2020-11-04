@@ -47,9 +47,9 @@ public class ServerConsole implements ChatIF{
 		   * @param host The host address.
 		   * @param port The port to listen on.
 		   */
-		  public ServerConsole(String host, int port) 
+		  public ServerConsole(EchoServer sv) 
 		  {
-			echoServer = new EchoServer(port);
+			echoServer = sv;
 		    try 
 		    {
 		      echoServer.listen();      
@@ -59,20 +59,13 @@ public class ServerConsole implements ChatIF{
 		      System.out.println("Error: Could not start server");
 		    }
 		    
-		    try {
-		    	client = new ChatClient(null, host, port, this);
-		    }
-		    catch(IOException e) {
-		    	System.out.println("Error: could not start server");
-		    }
-		    
 		    serverIO = new Scanner(System.in); 
 		  }
 
 		  
 		  //Instance methods ************************************************
-		  
-		  /**
+
+		/**
 		   * This method waits for input from the user.  Once it is 
 		   * received, it sends a concatonated SERVER MSG> string to notify 
 		   * the users the message originates from the server.
@@ -88,32 +81,24 @@ public class ServerConsole implements ChatIF{
 		      {
 		        message = serverIO.nextLine();
 
-		        if (message.startsWith("#")) {
-		        	handleClientFunctions(message);
-		        	continue;
-		        }
-		        if (!client.isConnected()) {
-		        	System.out.println("Failed to send message due to the server not nbeing connected");
-		        }
+		        if (message.charAt(0) == '#') {
+		    		 handleClientFunctions (message);
+		    	}
 		        
-		        client.handleMessageFromClientUI("SERVER MSG> " + message);
+				echoServer.sendToAllClients("SERVER MSG> " + message);
+				display("SERVER MSG> " + message);
 		      }
 		    } 
 		    catch (Exception ex) 
 		    {
 		      System.out.println
-		        ("Unexpected error while reading from console!");
+		        ("Unexpected error while reading from console! " + ex);
 		    }
 		  }
 
 		  private void handleClientFunctions(String message) {
 			if (message.equals("#quit")) {
-				try {
-					echoServer.close();
-				}
-				catch(IOException e) {
-					System.out.println("Error: could not close server");
-				}
+				System.exit(0);
 			}
 			else if (message.equals("#stop")) {
 				if (!echoServer.isListening()) {
@@ -126,15 +111,13 @@ public class ServerConsole implements ChatIF{
 				try {
 					echoServer.close();
 				}catch(IOException e) {}
-				
-				System.out.println("Server has been closed");
 			}
-			else if (message.equals("#setPort")) {
+			else if (message.startsWith("#setport")) {
 				if (echoServer.isListening()) {
 					System.out.println("Unable to set a new port while the server is listening");
 					return;
 				}
-				if (message.split(" ").length < 2) {
+				if (message.split(" ").length != 2) {
 					System.out.println("Missing argument, #setport <port> required");
 					return;
 				}
@@ -168,38 +151,9 @@ public class ServerConsole implements ChatIF{
 		}
 
 
-		/**
-		   * This method displays all messages sent to the server on the console.
-		   *
-		   * @param message The string to be displayed.
-		   */
-		  public void display(String message) 
-		  {
-		    System.out.println("> " + message);
-		  }
-
-		  
-		  //Class methods ***************************************************
-		  
-		  /**
-		   * This method is responsible for the creation of the server-side UI.
-		   * @param args port argument to specify the port number which both the
-		   * server and server console will listen.
-		   */
-		  public static void main(String[] args) 
-		  {
-		    String host = "localhost";
-		    int port = 0;
-		    
-		    try
-		    {
-		      port = Integer.parseInt(args[0]); //get port number from command line
-		    }
-		    catch(Exception e) //use default if the integer arg could not be parsed
-		    {
-		      port = DEFAULT_PORT;
-		    }
-		    ServerConsole chat = new ServerConsole(host, port);
-		    chat.accept();  //Wait for server-side messaging
-		  }
+		@Override
+		public void display(String message) {
+			// TODO Auto-generated method stub
+			
 		}
+}
